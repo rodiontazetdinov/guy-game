@@ -28,6 +28,7 @@ cp "$DIR/viktorina.html"                   "$C2/"
 cp -r "$DIR/kiosk/." "$C2/kiosk/"
 cp "$DIR/docs/Инструкция_по_установке.md" "$DIR/docs/Руководство_викторина.md" "$DIR/docs/Проверка_приёмки.md" "$C2/docs/"
 cp "$DIR/foto/"*.jpg "$DIR/foto/"*.jpeg "$DIR/foto/"*.png "$C2/foto/" 2>/dev/null || true   # фото вопросов + фон
+mkdir -p "$C2/audio" && cp "$DIR/audio/q"*.mp3 "$C2/audio/" 2>/dev/null || true             # озвучка вопросов
 [ -f "$DIR/foto/README.txt" ] && cp "$DIR/foto/README.txt" "$C2/foto/" || true
 
 # викторина по умолчанию должна стартовать как viktorina.html — поправим шаблоны автозапуска копии

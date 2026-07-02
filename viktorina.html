@@ -42,8 +42,10 @@
   .team .stars{font-size:clamp(18px,2.6vmin,30px); line-height:1.1; margin-top:2px; min-height:clamp(22px,3vmin,34px); word-break:break-all;}
   #teamL .stars{color:var(--t1);} #teamR .stars{color:var(--t2);}
   .team .sc{font-size:16px; opacity:.9; margin-top:2px;}
-  .team .lk{display:inline-block; margin-top:4px; font-size:15px; font-weight:700; color:#9aa6b2;}
-  .team .lk.on{color:#fff; background:rgba(60,138,58,.85); border-radius:8px; padding:1px 9px;}
+  /* постоянные метрики (padding всегда) — плашка «ГОТОВО» не сдвигает интерфейс */
+  .team .lk{display:inline-block; margin-top:4px; font-size:15px; font-weight:700; color:#9aa6b2;
+    padding:1px 9px; border-radius:8px; background:transparent;}
+  .team .lk.on{color:#fff; background:rgba(60,138,58,.85);}
 
   #center{flex:1 1 auto; text-align:center; display:flex; flex-direction:column; justify-content:center;}
   #setname{font-family:var(--script); font-size:clamp(20px,3.2vmin,34px); color:var(--cream); line-height:1; text-shadow:0 2px 6px rgba(0,0,0,.6);}
@@ -104,6 +106,19 @@
     font-family:var(--script); font-size:clamp(22px,3.4vmin,30px); display:flex; align-items:center; justify-content:center;}
   .setItem .cnt{margin-left:auto; font-size:16px; font-weight:400; color:#6a6150;}
   .menuHint{margin-top:22px; font-size:15px; color:#6a6150;}
+  /* Инфографика управления (как в игре-стройке) */
+  .howrow{display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:12px; margin-top:18px;}
+  .how{background:#fff; border:2px solid #e6ddc6; border-radius:14px; padding:14px 8px 12px; text-align:center;}
+  .how b{display:block; font-size:clamp(14px,1.9vmin,17px); margin:9px 0 3px; color:var(--ink);}
+  .how span{font-size:clamp(11px,1.5vmin,13px); color:#6a6150; line-height:1.35;}
+  .pic{height:48px; display:flex; align-items:center; justify-content:center; gap:7px;}
+  .btnA{width:42px; height:42px; border-radius:50%; background:#3c8a3a; color:#fff; font-weight:900; font-size:22px;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 3px 0 #276325;}
+  .dcross{position:relative; width:42px; height:42px; display:inline-block;}
+  .dcross::before,.dcross::after{content:''; position:absolute; background:#2e2820; border-radius:7px;}
+  .dcross::before{left:14px; top:0; width:14px; height:42px;}
+  .dcross::after{top:14px; left:0; width:42px; height:14px;}
+  .star2{font-size:36px; color:var(--red); line-height:1;}
 
   .winLine{font-family:var(--script); font-size:clamp(28px,5.5vmin,46px); margin:6px 0;}
   .scoreRow{display:flex; justify-content:center; gap:clamp(16px,4vmin,40px); margin-top:16px; flex-wrap:wrap;}
@@ -122,11 +137,22 @@
   <div class="card">
     <div class="star">★ ★ ★</div>
     <h1>Большое путешествие<br>по маленькому городу</h1>
-    <div class="sub">Викторина двух команд. Отвечайте кнопками джойстика —
-      за правильный ответ команда получает звёздочку. Выберите набор вопросов:</div>
+    <div class="sub"><b>Две команды — красная и жёлтая.</b> Выберите набор вопросов:</div>
     <div id="setList"></div>
-    <div class="menuHint">Навигация: <b>↑/↓</b> или стик · Подтвердить: <b>кнопка A</b> /
-      <span class="keycap">Пробел</span> · Старт без джойстиков — с клавиатуры.</div>
+    <div class="howrow">
+      <div class="how">
+        <div class="pic"><span class="dcross"></span></div>
+        <b>Выбирай ответ</b><span>стик вверх/вниз</span>
+      </div>
+      <div class="how">
+        <div class="pic"><span class="btnA">A</span></div>
+        <b>Отвечай!</b><span>зелёная кнопка</span>
+      </div>
+      <div class="how">
+        <div class="pic"><span class="star2">★</span></div>
+        <b>Звезда — за верный ответ</b><span>ответ откроется, когда<br>обе команды готовы</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -176,7 +202,7 @@
       <div class="scoreBox t1"><div class="bn">Команда 1</div><div class="bv" id="endS1">0</div><div>звёзд</div></div>
       <div class="scoreBox t2"><div class="bn">Команда 2</div><div class="bv" id="endS2">0</div><div>звёзд</div></div>
     </div>
-    <div class="btnHint">Сыграть снова — <span class="keycap">Пробел</span> или <b>кнопка A</b></div>
+    <div class="btnHint">Сыграть снова — <b>кнопка A</b></div>
   </div>
 </div>
 
@@ -289,7 +315,7 @@ const QUIZ_SETS = [
     "correct": 1
    },
    {
-    "q": "Когда открылся пионрский лагерь «Солнечная горка?",
+    "q": "Когда открылся пионерский лагерь «Солнечная горка»?",
     "photo": "foto/q8.jpg",
     "options": [
      "1959",
@@ -695,8 +721,17 @@ const Sound = (function(){
     else if(name==='reveal'){ [392,523,659].forEach((f,i)=>tone(f,t+i*0.06,0.4,'triangle',0.14)); }
     else if(name==='star'){ tone(1047,t,0.18,'triangle',0.2); tone(1568,t+0.04,0.22,'sine',0.12); }
     else if(name==='win'){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,t+i*0.12,0.8,'triangle',0.18)); } }
-  function toggleMute(){ muted=!muted; if(master) master.gain.value=muted?0:0.5; return muted; }
-  return { sfx, toggleMute };
+  // Озвучка вопросов (Яндекс SpeechKit «Ермил», файлы audio/qN.mp3)
+  let narr=null;
+  function narrate(src){
+    if(muted) return;
+    try{ if(narr){ narr.pause(); } narr=new Audio(src); narr.volume=0.95;
+      narr.play().catch(()=>{}); }catch(e){}
+  }
+  function stopNarration(){ if(narr){ narr.pause(); narr=null; } }
+  function toggleMute(){ muted=!muted; if(master) master.gain.value=muted?0:0.5;
+    if(narr) narr.muted=muted; return muted; }
+  return { sfx, toggleMute, narrate, stopNarration };
 })();
 
 // ---------- Состояние ----------
@@ -767,6 +802,10 @@ function showQuestion(){
   });
   setHint('play');
   renderLocks(); paintOptions();
+  // озвучка вопроса тем же голосом (номер берём из имени фото foto/qN.*)
+  Sound.stopNarration();
+  const mA=(q.photo||'').match(/q(\d+)\./);
+  if(mA) Sound.narrate('audio/q'+mA[1]+'.mp3');
 }
 
 // ---------- Подсветка вариантов / маркеры команд ----------
@@ -793,8 +832,9 @@ function renderScores(){
 function doReveal(){
   if(state!=='play') return;
   state='reveal'; clearTimeout(autoRevealT);
-  // незалоченные команды отвечают текущим выбором
-  TEAMS.forEach(t=>{ if(t.choice<0) t.choice=t.sel; });
+  Sound.stopNarration();   // озвучка вопроса умолкает при раскрытии
+  // незалоченные команды отвечают текущим выбором; помечаем всех «готово» (иначе висит «выбирает…»)
+  TEAMS.forEach(t=>{ if(t.choice<0) t.choice=t.sel; t.locked=true; });
   const q=curQ();
   optEls.forEach((el,i)=>{
     el.classList.remove('s1','s2');
@@ -843,14 +883,10 @@ function endQuiz(){
 function setHint(mode){
   const h=$('hint');
   if(mode==='play'){
-    h.innerHTML='<b style="color:var(--t1soft)">Команда 1</b>: <span class="keycap">W</span>/<span class="keycap">S</span> или стик · '+
-      '<span class="keycap">D</span>/<b>A</b> ответить &nbsp;|&nbsp; '+
-      '<b style="color:var(--t2soft)">Команда 2</b>: <span class="keycap">↑</span>/<span class="keycap">↓</span> или стик · '+
-      '<span class="keycap">Enter</span>/<b>A</b> ответить &nbsp;|&nbsp; '+
-      'Ведущий: <span class="keycap">Пробел</span> — показать ответ';
+    h.innerHTML='Стик — выбрать вариант · кнопка <b>A</b> — ответить · '+
+      'ответ откроется, когда <b>обе команды</b> будут готовы';
   } else {
-    h.innerHTML='Правильный ответ подсвечен зелёным. '+
-      '<b>Дальше</b> — <span class="keycap">Пробел</span>, <b>кнопка A</b> или кнопка любой команды';
+    h.innerHTML='Правильный ответ подсвечен зелёным. <b>Дальше</b> — кнопка A';
   }
 }
 
@@ -866,6 +902,7 @@ addEventListener('keyup', e=>{ keyState[e.code]=false; });
 
 function handleKey(k, e){
   if(k==='KeyM'){ Sound.toggleMute(); return; }       // M — вкл/выкл звук
+  if(k==='KeyR' && state==='play'){ doReveal(); return; }   // R — служебное ПРИНУДИТЕЛЬНОЕ раскрытие (если команда зависла)
   // глобальные «дальше/подтвердить» — Пробел
   if(k==='Space'){ advance(); if(e) e.preventDefault(); return; }
   if(state==='menu'){
@@ -904,12 +941,12 @@ function teamLock(t){ if(state!=='play'||t.locked) return;
 // «универсальная» кнопка ведущего / подтверждения
 function advance(){
   if(state==='menu') chooseSet();
-  else if(state==='play') doReveal();
+  else if(state==='play'){ if(TEAMS.every(t=>t.locked)) doReveal(); }   // ответ открывается ТОЛЬКО когда обе команды готовы
   else if(state==='reveal') nextQuestion();
   else if(state==='end') toMenu();
 }
 function toMenu(){
-  state='menu'; menuSel=setIdx;
+  state='menu'; menuSel=setIdx; Sound.stopNarration();
   $('endScreen').classList.add('hidden');
   $('playScreen').classList.add('hidden');
   $('menuScreen').classList.remove('hidden');
