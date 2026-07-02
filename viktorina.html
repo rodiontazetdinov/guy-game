@@ -42,9 +42,11 @@
   .team .stars{font-size:clamp(18px,2.6vmin,30px); line-height:1.1; margin-top:2px; min-height:clamp(22px,3vmin,34px); word-break:break-all;}
   #teamL .stars{color:var(--t1);} #teamR .stars{color:var(--t2);}
   .team .sc{font-size:16px; opacity:.9; margin-top:2px;}
-  /* постоянные метрики (padding всегда) — плашка «ГОТОВО» не сдвигает интерфейс */
+  /* ЖЁСТКО фиксированные метрики — плашка «ГОТОВО» не может сдвинуть страницу
+     (символ ✓ берётся из системного шрифта с другой высотой строки — прижимаем) */
   .team .lk{display:inline-block; margin-top:4px; font-size:15px; font-weight:700; color:#9aa6b2;
-    padding:1px 9px; border-radius:8px; background:transparent;}
+    padding:0 9px; border-radius:8px; background:transparent;
+    height:26px; line-height:26px; overflow:hidden; vertical-align:top;}
   .team .lk.on{color:#fff; background:rgba(60,138,58,.85);}
 
   #center{flex:1 1 auto; text-align:center; display:flex; flex-direction:column; justify-content:center;}
@@ -870,12 +872,16 @@ function endQuiz(){
   $('playScreen').classList.add('hidden');
   $('endS1').textContent=scores[0]; $('endS2').textContent=scores[1];
   const wl=$('winLine'), ws=$('winSub');
+  const FAREWELL='Вы — настоящие знатоки родного города! Изучайте историю Гая, гордитесь ею — и, может быть, новые страницы этой истории напишете именно вы.';
+  let track;
   if(scores[0]>scores[1]){ wl.textContent='Победила Команда 1!'; wl.style.color='var(--t1)';
-    ws.textContent='Красные звёзды зажглись ярче. Поздравляем!'; }
+    ws.textContent='Красные звёзды зажглись ярче! '+FAREWELL; track='win1'; }
   else if(scores[1]>scores[0]){ wl.textContent='Победила Команда 2!'; wl.style.color='var(--t2)';
-    ws.textContent='Жёлтые звёзды зажглись ярче. Поздравляем!'; }
-  else { wl.textContent='Ничья — дружба!'; wl.style.color='var(--red)';
-    ws.textContent='Обе команды набрали поровну звёзд. Молодцы!'; }
+    ws.textContent='Жёлтые звёзды зажглись ярче! '+FAREWELL; track='win2'; }
+  else { wl.textContent='Ничья — победила дружба!'; wl.style.color='var(--red)';
+    ws.textContent='Обе команды набрали поровну звёзд. '+FAREWELL; track='draw'; }
+  // торжественная озвучка финала (после фанфар)
+  setTimeout(()=>Sound.narrate('audio/'+track+'.mp3'), 700);
   $('endScreen').classList.remove('hidden');
 }
 
