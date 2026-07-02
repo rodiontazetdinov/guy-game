@@ -68,6 +68,7 @@
   #qcol{flex:1 1 auto; display:flex; flex-direction:column; min-width:0;}
   #qtext{font-size:clamp(20px,3.6vmin,38px); font-weight:700; line-height:1.18; color:#fff; margin:4px 0 clamp(8px,1.6vmin,16px); text-shadow:0 2px 8px rgba(0,0,0,.5);}
   #options{display:flex; flex-direction:column; gap:clamp(8px,1.4vmin,14px); flex:1 1 auto; justify-content:center;}
+  #options.listen .opt{opacity:.55;}   /* пока звучит вопрос — варианты притушены, ответы заблокированы */
   .opt{position:relative; display:flex; align-items:center; gap:clamp(10px,1.8vmin,18px); background:rgba(34,28,20,.8);
     border:4px solid #5a4d38; border-radius:16px; padding:clamp(8px,1.5vmin,14px) clamp(12px,2vmin,20px); transition:border-color .15s, background .15s;}
   .opt .letter{flex:0 0 auto; width:clamp(38px,5.6vmin,54px); height:clamp(38px,5.6vmin,54px); border-radius:12px; background:#4a3f2c; color:var(--cream);
@@ -725,10 +726,14 @@ const Sound = (function(){
     else if(name==='win'){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,t+i*0.12,0.8,'triangle',0.18)); } }
   // Озвучка вопросов (Яндекс SpeechKit «Ермил», файлы audio/qN.mp3)
   let narr=null;
-  function narrate(src){
-    if(muted) return;
+  function narrate(src, onend){
+    if(muted){ return null; }
     try{ if(narr){ narr.pause(); } narr=new Audio(src); narr.volume=0.95;
-      narr.play().catch(()=>{}); }catch(e){}
+      let fired=false; const fin=()=>{ if(fired) return; fired=true; if(onend) onend(); };
+      narr.addEventListener('ended', fin); narr.addEventListener('error', fin);
+      narr.play().catch(fin);
+      return narr;
+    }catch(e){ if(onend) onend(); return null; }
   }
   function stopNarration(){ if(narr){ narr.pause(); narr=null; } }
   function toggleMute(){ muted=!muted; if(master) master.gain.value=muted?0:0.5;
@@ -738,6 +743,7 @@ const Sound = (function(){
 
 // ---------- Состояние ----------
 let state = 'menu';            // 'menu' | 'play' | 'reveal' | 'end'
+let answerLock=false, answerLockT=null;   // пока озвучка читает вопрос — отвечать нельзя
 let menuSel = 0;
 let setIdx = 0, qIdx = 0;
 const scores = [0,0];
@@ -802,12 +808,16 @@ function showQuestion(){
       '<div class="badge" id="badge'+i+'"></div>';
     box.appendChild(el); optEls.push(el);
   });
-  setHint('play');
   renderLocks(); paintOptions();
-  // озвучка вопроса тем же голосом (номер берём из имени фото foto/qN.*)
-  Sound.stopNarration();
+  // Озвучка вопроса. Пока голос читает — отвечать НЕЛЬЗЯ (иначе спамят, не слушая).
+  Sound.stopNarration(); clearTimeout(answerLockT);
   const mA=(q.photo||'').match(/q(\d+)\./);
-  if(mA) Sound.narrate('audio/q'+mA[1]+'.mp3');
+  const unlockAns=()=>{ if(!answerLock) return; answerLock=false;
+    document.getElementById('options').classList.remove('listen'); if(state==='play') setHint('play'); };
+  answerLock=true; document.getElementById('options').classList.add('listen');
+  const started=mA ? Sound.narrate('audio/q'+mA[1]+'.mp3', unlockAns) : null;
+  if(started){ setHint('listen'); answerLockT=setTimeout(unlockAns, 20000); }  // страховка 20с
+  else unlockAns();                                                            // без озвучки (mute/нет файла) — сразу
 }
 
 // ---------- Подсветка вариантов / маркеры команд ----------
@@ -872,23 +882,31 @@ function endQuiz(){
   $('playScreen').classList.add('hidden');
   $('endS1').textContent=scores[0]; $('endS2').textContent=scores[1];
   const wl=$('winLine'), ws=$('winSub');
-  const FAREWELL='Вы — настоящие знатоки родного города! Изучайте историю Гая, гордитесь ею — и, может быть, новые страницы этой истории напишете именно вы.';
+  // напутствие СВОЁ для каждой части викторины — чтобы не повторялось
+  const FAREWELLS={
+    part1:'Вы — настоящие знатоки родного города! Изучайте историю Гая, гордитесь ею — и, может быть, новые страницы этой истории напишете именно вы.',
+    part2:'Город Гай начинался с палаток в голой степи — а вырос благодаря людям, которые его любили. Теперь его историю знаете и вы — расскажите о ней друзьям!',
+    part3:'Гай построили такие же мальчишки и девчонки, только повзрослевшие — смелые и дружные. Пусть родной город растёт и хорошеет вместе с вами!'
+  };
+  const setId=QUIZ_SETS[setIdx].id, fw=FAREWELLS[setId]||FAREWELLS.part1;
   let track;
   if(scores[0]>scores[1]){ wl.textContent='Победила Команда 1!'; wl.style.color='var(--t1)';
-    ws.textContent='Красные звёзды зажглись ярче! '+FAREWELL; track='win1'; }
+    ws.textContent='Красные звёзды зажглись ярче! '+fw; track='win1'; }
   else if(scores[1]>scores[0]){ wl.textContent='Победила Команда 2!'; wl.style.color='var(--t2)';
-    ws.textContent='Жёлтые звёзды зажглись ярче! '+FAREWELL; track='win2'; }
+    ws.textContent='Жёлтые звёзды зажглись ярче! '+fw; track='win2'; }
   else { wl.textContent='Ничья — победила дружба!'; wl.style.color='var(--red)';
-    ws.textContent='Обе команды набрали поровну звёзд. '+FAREWELL; track='draw'; }
-  // торжественная озвучка финала (после фанфар)
-  setTimeout(()=>Sound.narrate('audio/'+track+'.mp3'), 700);
+    ws.textContent='Обе команды набрали поровну звёзд. '+fw; track='draw'; }
+  // торжественная озвучка финала (после фанфар); дорожка своя для части и исхода
+  setTimeout(()=>Sound.narrate('audio/fin_'+setId+'_'+track+'.mp3'), 700);
   $('endScreen').classList.remove('hidden');
 }
 
 // ---------- Подсказки ----------
 function setHint(mode){
   const h=$('hint');
-  if(mode==='play'){
+  if(mode==='listen'){
+    h.innerHTML='🔊 <b>Слушаем вопрос…</b> отвечать можно после озвучки';
+  } else if(mode==='play'){
     h.innerHTML='Стик — выбрать вариант · кнопка <b>A</b> — ответить · '+
       'ответ откроется, когда <b>обе команды</b> будут готовы';
   } else {
@@ -938,9 +956,9 @@ function handleKey(k, e){
 }
 
 // ---------- Действия команд ----------
-function teamMove(t,d){ if(t.locked) return; const n=curQ().options.length;
+function teamMove(t,d){ if(t.locked||answerLock) return; const n=curQ().options.length;
   t.sel=(t.sel+d+n)%n; paintOptions(); Sound.sfx('move'); }
-function teamLock(t){ if(state!=='play'||t.locked) return;
+function teamLock(t){ if(state!=='play'||t.locked||answerLock) return;
   t.locked=true; t.choice=t.sel; renderLocks(); Sound.sfx('lock');
   if(TEAMS.every(x=>x.locked)){ clearTimeout(autoRevealT); autoRevealT=setTimeout(doReveal,500); } }
 
