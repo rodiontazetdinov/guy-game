@@ -1,0 +1,12 @@
+# Сгенерированное и служебное
+delivery/
+*.cdn-backup.html
+.DS_Store
+
+# Наследие прототипа: тяжёлая GLB-модель больше не используется играми
+panel-house.glb
+panel-house-data.js
+model-viewer-referens.html
+
+# Черновые woff2 (шрифты уже вшиты в HTML)
+fonts/*.woff2

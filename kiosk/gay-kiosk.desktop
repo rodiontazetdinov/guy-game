@@ -1,0 +1,11 @@
+[Desktop Entry]
+# ШАБЛОН автозапуска. Не правьте вручную — запустите kiosk/install-autostart.sh,
+# он подставит реальный путь и установит этот файл в ~/.config/autostart/.
+Type=Application
+Name=Игра «Строим Гай» (киоск)
+Name[ru]=Игра «Строим Гай» (киоск)
+Comment=Автозапуск игры-стройки в полноэкранном киоске
+Exec=__GAME_DIR__/kiosk/start-kiosk.sh
+Terminal=false
+X-GNOME-Autostart-enabled=true
+NoDisplay=false
