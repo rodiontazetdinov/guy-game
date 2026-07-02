@@ -303,8 +303,23 @@ const Sound = (function(){
     musicEl=new Audio('audio/music.mp3'); musicEl.loop=true; musicEl.volume=0.32;        // реальный файл, если есть
     let fell=false; const fb=()=>{ if(fell) return; fell=true; musicEl=null; synthPad(); }; // иначе — процедурный пэд
     musicEl.addEventListener('error', fb); musicEl.play().then(()=>{}).catch(fb); }
-  function toggleMute(){ muted=!muted; if(master) master.gain.value=muted?0:0.5; if(musicEl) musicEl.muted=muted; return muted; }
-  return { sfx, startMusic, toggleMute };
+  // Озвучка справок (Яндекс SpeechKit, голос «Ермил», файлы в audio/) — играет при показе справки
+  let narr=null;
+  function narrate(src, onend){
+    if(muted){ return null; }
+    try{
+      if(narr){ narr.pause(); narr=null; }
+      narr=new Audio(src); narr.volume=0.95;
+      let fired=false; const fin=()=>{ if(fired) return; fired=true; if(onend) onend(); };
+      narr.addEventListener('ended', fin); narr.addEventListener('error', fin);
+      narr.play().catch(fin);
+      return narr;
+    }catch(e){ if(onend) onend(); return null; }
+  }
+  function stopNarration(){ if(narr){ narr.pause(); narr=null; } }
+  function toggleMute(){ muted=!muted; if(master) master.gain.value=muted?0:0.5; if(musicEl) musicEl.muted=muted;
+    if(narr) narr.muted=muted; return muted; }
+  return { sfx, startMusic, toggleMute, narrate, stopNarration };
 })();
 
 // ---------- Справочные тексты (ЧЕРНОВЫЕ — заменит музей) ----------
@@ -906,7 +921,7 @@ function enterStage(i){
   stageIdx=i; const s=STAGES[i];
   unlockKeys(s.unlock);
   showBanner(s); Sound.sfx('stage');
-  setTimeout(()=>showFact(s.fact), 5400);   // после того как баннер этапа скрылся (не под тёмным слоем)
+  setTimeout(()=>showFact(s.fact, i), 5400);   // после того как баннер этапа скрылся; i — номер этапа для озвучки
   updateStageHUD(); updateHUD();
 }
 let advancing=false;
@@ -974,17 +989,23 @@ function showBanner(s){
 }
 // ---------- Историческая справка ----------
 let factTimer=null;
-function showFact(f){
+function showFact(f, idx){
   if(!f){ eduUnlock(); return; }
   document.getElementById('facttitle').textContent=f.title;
   document.getElementById('factbody').textContent=f.body;
   const el=document.getElementById('fact'); el.classList.add('show');
-  clearTimeout(factTimer); factTimer=setTimeout(()=>{ el.classList.remove('show'); eduUnlock(); },7000);
+  clearTimeout(factTimer);
+  let done=false;
+  const finish=()=>{ if(done) return; done=true; el.classList.remove('show'); eduUnlock(); };
+  // Озвучка справки (голос Ермил): справка и пауза держатся до конца дорожки
+  const a=(idx!==undefined) ? Sound.narrate('audio/fact'+(idx+1)+'.mp3', finish) : null;
+  factTimer=setTimeout(finish, a?22000:7000);   // страховка: без озвучки 7с, с озвучкой максимум 22с
 }
 
 // ---------- Финал ----------
 function endGame(){
   running=false; Sound.sfx('win');
+  setTimeout(()=>Sound.narrate('audio/final.mp3'), 900);   // финальное напутствие вместе с экраном
   const houses=HOUSE_KEYS.reduce((s,k)=>s+(counts[k]||0),0);
   document.getElementById('sHouses').textContent=houses;
   document.getElementById('sPeople').textContent=people;
@@ -1130,6 +1151,7 @@ function startGame(){
   peeps.forEach(pp=>scene.remove(pp.g)); peeps.length=0;
   fx.forEach(f=>scene.remove(f.sp)); fx.length=0;
   clearTimeout(factTimer); document.getElementById('fact').classList.remove('show');   // старый таймер справки не должен снять новую блокировку
+  Sound.stopNarration();
   if(train){ scene.remove(train); train=null; trainPath=null; }
   const starts=[[4,4],[5,4],[4,5],[5,5]];
   players.forEach((p,i)=>{ p.gx=starts[i][0]; p.gz=starts[i][1]; p.build=0; p.built=0;
