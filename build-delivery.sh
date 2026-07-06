@@ -20,13 +20,13 @@ mkdir -p "$C1/foto"
 cp "$DIR/foto/stage"*.jpg "$C1/foto/" 2>/dev/null || true            # архивные фото-превью этапов
 cp -r "$DIR/libs"                          "$C1/"
 cp -r "$DIR/kiosk/." "$C1/kiosk/"                                    # все скрипты киоска (Windows .bat + Linux .sh)
-cp "$DIR/docs/Инструкция_по_установке.md" "$DIR/docs/Руководство_стройка.md" "$DIR/docs/Проверка_приёмки.md" "$C1/docs/"
+cp "$DIR/docs/Инструкция_по_установке.md" "$DIR/docs/Руководство_стройка.md" "$DIR/docs/Проверка_приёмки.md" "$DIR/docs/ПАМЯТКА-сотруднику-музея.md" "$C1/docs/"
 mkdir -p "$C1/audio" && cp "$DIR/audio/fact"*.mp3 "$DIR/audio/final.mp3" "$C1/audio/" 2>/dev/null || true   # только озвучка стройки (справки этапов + финал), без файлов викторины
 
 # --- Контракт №2: викторина ---
 cp "$DIR/viktorina.html"                   "$C2/"
 cp -r "$DIR/kiosk/." "$C2/kiosk/"
-cp "$DIR/docs/Инструкция_по_установке.md" "$DIR/docs/Руководство_викторина.md" "$DIR/docs/Проверка_приёмки.md" "$C2/docs/"
+cp "$DIR/docs/Инструкция_по_установке.md" "$DIR/docs/Руководство_викторина.md" "$DIR/docs/Проверка_приёмки.md" "$DIR/docs/ПАМЯТКА-сотруднику-музея.md" "$C2/docs/"
 cp "$DIR/foto/"*.jpg "$DIR/foto/"*.jpeg "$DIR/foto/"*.png "$C2/foto/" 2>/dev/null || true   # фото вопросов + фон
 mkdir -p "$C2/audio" && cp "$DIR/audio/q"*.mp3 "$DIR/audio/fin_"*.mp3 "$C2/audio/" 2>/dev/null || true   # озвучка вопросов + финалов (3 части × 3 исхода)
 [ -f "$DIR/foto/README.txt" ] && cp "$DIR/foto/README.txt" "$C2/foto/" || true
