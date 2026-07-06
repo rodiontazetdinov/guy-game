@@ -6,7 +6,7 @@ rem
 rem  Usage: just double-click. The script auto-detects the game that
 rem  sits next to it (build game OR quiz). Or pass it explicitly:
 rem      start-kiosk.bat viktorina.html
-rem  Exit kiosk: Alt+F4 (window relaunches; close this window to stop).
+rem  Exit kiosk: press Esc inside the game. No auto-relaunch.
 rem
 rem  NOTE: kept ASCII-only on purpose. Cyrillic text + codepage tricks
 rem  (chcp) break .bat parsing on some Windows systems.
@@ -45,12 +45,10 @@ if not defined MODE (
   pause
   exit /b 1
 )
-echo Game: %URL%
-echo (Alt+F4 = exit; window relaunches. Close this window to stop.)
-
-:loop
-if "%MODE%"=="edge"    start "" /wait "%BROWSER%" --kiosk "%URL%" --edge-kiosk-type=fullscreen --no-first-run --overscroll-history-navigation=0 --user-data-dir="%PROFILE%"
-if "%MODE%"=="chrome"  start "" /wait "%BROWSER%" --kiosk "%URL%" --no-first-run --disable-pinch --overscroll-history-navigation=0 --incognito --user-data-dir="%PROFILE%"
-if "%MODE%"=="firefox" start "" /wait "%BROWSER%" -kiosk "%URL%"
-timeout /t 2 /nobreak >nul
-goto loop
+echo Launching kiosk: %URL%
+echo Press Esc in the game to close it. No auto-relaunch.
+rem Launch once (fire-and-forget). Esc in the game closes the window; the
+rem kiosk is NOT relaunched. This .bat window closes right after launching.
+if "%MODE%"=="edge"    start "" "%BROWSER%" --kiosk "%URL%" --edge-kiosk-type=fullscreen --no-first-run --overscroll-history-navigation=0 --user-data-dir="%PROFILE%"
+if "%MODE%"=="chrome"  start "" "%BROWSER%" --kiosk "%URL%" --no-first-run --disable-pinch --overscroll-history-navigation=0 --incognito --user-data-dir="%PROFILE%"
+if "%MODE%"=="firefox" start "" "%BROWSER%" -kiosk "%URL%"

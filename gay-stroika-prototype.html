@@ -288,6 +288,7 @@
     curT=setTimeout(function(){ document.body.style.cursor='none'; }, 3000); }
   addEventListener('mousemove', showCur); showCur();
   addEventListener('keydown', function(e){
+    if(e.code==='Escape'){ try{ window.close(); }catch(_){} }  // Esc — закрыть игру (выход из киоска); в F11-режиме Esc выходит из полноэкранного
     var exit = e.code==='F11' || e.code==='F5'
       || ((e.ctrlKey||e.metaKey) && (e.code==='KeyR' || e.code==='KeyW'));
     if(exit){ e.preventDefault(); e.stopPropagation(); }
