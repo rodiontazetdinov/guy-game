@@ -18,6 +18,7 @@ cp "$DIR/gay-stroika-prototype.html"      "$C1/"
 [ -f "$DIR/gay-fon.jpg" ] && cp "$DIR/gay-fon.jpg" "$C1/" || true   # фон стартового экрана
 mkdir -p "$C1/foto"
 cp "$DIR/foto/stage"*.jpg "$C1/foto/" 2>/dev/null || true            # архивные фото-превью этапов
+cp "$DIR/foto/gay-city.jpg" "$DIR/foto/future-city.jpg" "$C1/foto/" 2>/dev/null || true  # фон заставки (Гай) + город будущего (финал)
 cp -r "$DIR/libs"                          "$C1/"
 cp -r "$DIR/kiosk/." "$C1/kiosk/"                                    # все скрипты киоска (Windows .bat + Linux .sh)
 cp "$DIR/docs/Инструкция_по_установке.md" "$DIR/docs/Руководство_стройка.md" "$DIR/docs/Проверка_приёмки.md" "$DIR/docs/ПАМЯТКА-сотруднику-музея.md" "$C1/docs/"
