@@ -21,7 +21,7 @@ cp "$DIR/foto/stage"*.jpg "$C1/foto/" 2>/dev/null || true            # архи�
 cp -r "$DIR/libs"                          "$C1/"
 cp -r "$DIR/kiosk/." "$C1/kiosk/"                                    # все скрипты киоска (Windows .bat + Linux .sh)
 cp "$DIR/docs/Инструкция_по_установке.md" "$DIR/docs/Руководство_стройка.md" "$DIR/docs/Проверка_приёмки.md" "$C1/docs/"
-[ -d "$DIR/audio" ] && cp -r "$DIR/audio" "$C1/" || true
+mkdir -p "$C1/audio" && cp "$DIR/audio/fact"*.mp3 "$DIR/audio/final.mp3" "$C1/audio/" 2>/dev/null || true   # только озвучка стройки (справки этапов + финал), без файлов викторины
 
 # --- Контракт №2: викторина ---
 cp "$DIR/viktorina.html"                   "$C2/"
